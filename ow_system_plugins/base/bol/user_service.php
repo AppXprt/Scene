@@ -51,6 +51,7 @@ final class BOL_UserService
     const PASSWORD_RESET_CODE_EXPIRATION_TIME = 3600;
     const PASSWORD_RESET_CODE_UPDATE_TIME = 600;
     const BEFORE_USER_ONLINE = 'base.before_user_online';
+    const EVENT_GET_USER_VIEW_QUESTIONS = 'base.get_user_view_questions';
     
     const EVENT_USER_QUERY_FILTER = BOL_UserDao::EVENT_QUERY_FILTER;
 
@@ -788,7 +789,28 @@ final class BOL_UserService
 
     public function findOnlineStatusForUserList( $idList )
     {
-        $onlineUsers = $this->userOnlineDao->findOnlineUserIdListFromIdList($idList);
+        // Check privacy permissions
+        $eventParams = array(
+            'action' => 'base_view_my_presence_on_site',
+            'ownerIdList' => $idList,
+            'viewerId' => OW::getUser()->getId()
+        );
+
+        $permission = OW::getEventManager()->getInstance()->call('privacy_check_permission_for_user_list', $eventParams);
+
+        $showPresenceList = array();
+
+        foreach ( $idList as $user )
+        {
+            if ( isset($permission[$user]['blocked']) && $permission[$user]['blocked'] == true )
+            {
+                continue;
+            }
+
+            $showPresenceList[] = $user;
+        }
+
+        $onlineUsers = $this->userOnlineDao->findOnlineUserIdListFromIdList($showPresenceList);
 
         $onlineUsersArr = array();
 
@@ -1703,6 +1725,17 @@ final class BOL_UserService
                 $q = (array) $q;
             }
         }
+
+        $event = new OW_Event(self::EVENT_GET_USER_VIEW_QUESTIONS, array(
+            'userId' => $userId,
+            'adminMode' => $adminMode,
+            'questionNames' => $questionNames,
+            'sectionNames' => $sectionNames
+        ), $questions);
+
+        OW::getEventManager()->trigger($event);
+
+        $questions = $event->getData();
 
         $section = null;
         $questionArray = array();
