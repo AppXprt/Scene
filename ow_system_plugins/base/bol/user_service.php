@@ -54,6 +54,7 @@ final class BOL_UserService
     const EVENT_GET_USER_VIEW_QUESTIONS = 'base.get_user_view_questions';
     
     const EVENT_USER_QUERY_FILTER = BOL_UserDao::EVENT_QUERY_FILTER;
+    const EVENT_ON_GET_DISPLAY_NAME = 'base.get_display_name';
 
     /**
      * @var BOL_UserDao
@@ -198,6 +199,12 @@ final class BOL_UserService
         $questionName = OW::getConfig()->getValue('base', 'display_name_question');
 
         $questionValue = BOL_QuestionService::getInstance()->getQuestionData(array($userId), array($questionName));
+        
+        $event = OW::getEventManager()->trigger(new OW_Event(self::EVENT_ON_GET_DISPLAY_NAME, array(
+            'userIdList' => array($userId),
+            'questionName' => $questionName
+        ), $questionValue));
+        $questionValue = $event->getData();
 
         $displayName = isset($questionValue[$userId]) ? ( isset($questionValue[$userId][$questionName]) ? $questionValue[$userId][$questionName] : '' ) : OW::getLanguage()->text('base', 'deleted_user');
 
@@ -217,6 +224,12 @@ final class BOL_UserService
         $questionName = OW::getConfig()->getValue('base', 'display_name_question');
 
         $questionValues = BOL_QuestionService::getInstance()->getQuestionData($userIdList, array($questionName));
+
+        $event = OW::getEventManager()->trigger(new OW_Event(self::EVENT_ON_GET_DISPLAY_NAME, array(
+            'userIdList' => $userIdList,
+            'questionName' => $questionName
+        ), $questionValues));
+        $questionValues = $event->getData();
 
         $resultArray = array();
         $emptyDisplayNames = array();
@@ -1349,11 +1362,18 @@ final class BOL_UserService
      */
     public function getNewResetPassword( $userId )
     {
+    	$code = md5(UTIL_String::getRandomString(8, 5));
+
+        $event = new OW_Event('base.on_after_generate_password_reset_code', [], $code);
+        OW::getEventManager()->trigger($event);
+
+        $code = $event->getData();
+
         $resetPassword = new BOL_UserResetPassword();
         $resetPassword->setUserId($userId);
         $resetPassword->setExpirationTimeStamp(( time() + self::PASSWORD_RESET_CODE_EXPIRATION_TIME));
         $resetPassword->setUpdateTimeStamp(time() + self::PASSWORD_RESET_CODE_UPDATE_TIME);
-        $resetPassword->setCode(md5(UTIL_String::getRandomString(8, 5)));
+        $resetPassword->setCode($code);
 
         $this->resetPasswordDao->save($resetPassword);
 
