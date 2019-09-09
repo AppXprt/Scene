@@ -17,7 +17,7 @@ Oxwall was launched in 2010 and is supported by a nonprofit organization Oxwall 
 ABOUT SCENE
 ============
 
-Scene is an open source social network platform that is extending Oxwall.
+Scene pulls in some commits, provides some updates and will eventually extend Oxwall.
 
 Scene was launched in 2019 ( see https://scene.appxprt.com/ )
 
