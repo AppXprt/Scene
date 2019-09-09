@@ -2,6 +2,7 @@ CONTENTS OF THIS FILE
 ====================
 
  * About Oxwall
+ * About Scene
  * Copyright
  * Installation and Configuration
  * Appearance
@@ -12,6 +13,13 @@ ABOUT OXWALL
 
 Oxwall is an open source social network platform, which supports a variety of community driven websites, from narrow fan clubs and local communities to extended social networking portals. It was designed and developed with a creative approach pursuing one purpose - to allow people running communities as easy as possible.
 Oxwall was launched in 2010 and is supported by a nonprofit organization Oxwall Foundation ( see http://www.oxwall.org/foundation/ ). For more information, visit Oxwall website at http://www.oxwall.org/.
+
+ABOUT SCENE
+============
+
+Scene is an open source social network platform that is extending Oxwall.
+
+Scene was launched in 2019 ( see https://scene.appxprt.com/ )
 
 COPYRIGHT
 =========
